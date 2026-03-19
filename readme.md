@@ -1,4 +1,4 @@
-* Build/onboard issues:
+# TODO Build/onboard:
 - OpenSSL is not plugged via defauld Conan config nor on cmake level (find_package + target_link_libs), for a person to be onboarded it will hurt
 - main.cpp: unistd.h doesn't exist on Windows, the code isn't cross-platform
 - client.cpp: compilation error at "std::format(R"({"op" as mixing formatting with raw string
@@ -6,13 +6,13 @@
 - client.cpp: no buffer consuming afer message reading within on_read, causes json exceptions on the second reading
 - bookbuilder.cpp: main loop in applyDelta goes out of the bounds because of "auto idx"
 
-* Infrastructure
+# TODO Infrastructure
 - CMakeLists.txt: we pin C++ standard via "CMAKE_CXX_STANDARD 23" for compilation, but package manager (Conan) has no mechanics to validate packages he downloads/build uses the same standard, we may face ABI issues and hardly possible to detect runtime problems
 - CMakeLists.txt: libraries versions are not pinned, each new CD and product will be a lottery during building and, which is more dangerous, in production; moreover Conan says specific version, but cmake doesn't check it (we are free to have packages already installed or use another package manager)
 - src/CMakeLists.txt: "file(GLOB_RECURSE SRC \*.cpp)" integrates sources implicitly, better to keep everything explicitly, more work, but more control and project/solution regeneration
 - src/CMakeLists.txt: for a small projects better to use one cmake file
 
-* Logic issues:
+# TODO Logic:
 - we use messages amount as input to our program and receive no more messages than this amount, while task description has no constraints description, we assume the program should work forever
 - client.cpp: ping_timer uses 1 minute delay, while bybit's documentation says we need to send heartbit packet every 20 seconds
 - client.cpp: ping_timer uses wrong message (subscription), documentation says about special one
@@ -30,7 +30,7 @@
 - bookbuilder.hpp: hardcoded type for book parameter, if depth constant changes, we need to fix type manually (should use the same template as for book)
 - book.hpp: empty compares nan with nan, which is always false, algorithms work wrong
 
-* Performance issues
+# TODO Performance
 - main.cpp: no need to "std::stoi(argv[1])" in order to parse (it creates/destroys std::string as stoi() wants it)
 - client.hpp: handleMessage make a string copy as an input param
 - client.cpp: ping/heartbeat mechanics should consider receiving market data and avoid ping-ponging, no need to block socket and use network resources if logically we are in alive state
@@ -45,13 +45,13 @@
 - book.hpp: PriceLevel's methods clear and empty are not marked as noexcept (ease inlining, better branching, more compiler optimizations, which is critical as this class is used in hot path)
 - bookbuilder.hpp: applyDelta isn't marked as noexcept, which may reduce compiler's optimizations
 
-* Architectural issues:
+# TODO Architecture:
 - client.hpp: Client is a god-object, handling connection, bybit data and logics; substitute any part is a real pain (for example: use local data instead of network, change bybit to another market with different data format. etc); should be decoupled and spread across layers (transport (network/file) <=> market-specific adapters <=> pure logics)
 - client.hpp: Client class actually implements specific market, but is named as a common one; we should split interface (base class) and implementation, bybit folder should contain implementation only for a specific market — connector and book builder, both book and client are implementation-independent
 - client.cpp: we use strands for creating async objects and operations, we guarantee they will go one after another, but if we start event loop on different threads and expect everything works (as we use strands!) we will have problems, because each object uses own strand (and ws object is used in on_ping_timer of ping_timer and on_read of ws) and data theys share (for example ws) is not thread safe; solution is to create one strand and use it
 - client.cpp: consider parsing data (on_read) within a separate thread to avoid blocking if data stream is expected to be huge (same for printing)
 
-* Other issues:
+# TODO Other:
 - main.cpp: no index check accessing argv[1], UB
 - main.cpp: standard main signature should return int
 - main.cpp: no exception catching on the top level, we want to shut down gracefully in the worst case and have something in log with the details
