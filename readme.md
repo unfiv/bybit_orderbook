@@ -1,3 +1,5 @@
+Bybit orderbook builder from boilerplate code. Most of the critical problems are solved, the list of others is below.
+
 # TODO Build/onboard:
 - OpenSSL is not plugged via defauld Conan config nor on cmake level (find_package + target_link_libs), for a person to be onboarded it will hurt
 - main.cpp: unistd.h doesn't exist on Windows, the code isn't cross-platform
